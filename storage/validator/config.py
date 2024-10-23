@@ -345,7 +345,7 @@ def add_args(cls, parser):
         nargs="+",
         type=str,
         help="List of whitelisted hotkeys.",
-        default=["5HBATntUR9FUyvrGaewMht9pU66qUbcEL9VadXF69EQhKLaZ", "5GhV9ZEY76jovhYc5cuYXPS867aY5Dinuc2GkxFGwLd62hqw"],
+        default=["5HiyMeyMqo2waN73adf8KLhyijjBKz7ehbW8QBoSz1AVZ8tn", "5Gn21zLYuyrm3C1p9sQg1rwthJrrR9mz6KkkQe2aRkq8grER"],
     )
     parser.add_argument(
         "--api.open_access",
