@@ -1,6 +1,6 @@
 torch>=1.13.0
 bcrypt==3.2.0
-bittensor==6.11.0
+bittensor==6.11.1
 redis==5.0.1
 pycryptodome==3.20.0
 pyinstrument==4.6.1
