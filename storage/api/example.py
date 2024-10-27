@@ -32,7 +32,7 @@ async def test_storage_primitives():
     store_handler = StoreUserAPI(wallet)
 
     # Fetch the axons of the available API nodes, or specify UIDs directly
-    metagraph = bt.subtensor("test").metagraph(netuid=22)
+    metagraph = bt.subtensor("test").metagraph(netuid=229)
     all_axons = await get_query_api_axons(wallet=wallet, metagraph=metagraph)
     axons = random.choices(all_axons, k=3)
 
@@ -67,10 +67,10 @@ async def test_storage_primitives():
 
 async def test_delete():
     cid = "bafkreiej3j74ywl3j2nsjxlrzj2jkyz2di7yahy4ilnfjjnkerrv76js6m"
-    hotkeys = ["5C86aJ2uQawR6P6veaJQXNK9HaWh6NMbUhTiLs65kq4ZW3NH"]
+    hotkeys = ["5HiyMeyMqo2waN73adf8KLhyijjBKz7ehbW8QBoSz1AVZ8tn"]
     wallet = bt.wallet()
     subtensor = bt.subtensor("test")
-    await delete(cid, wallet, subtensor, hotkeys=hotkeys, netuid=22)
+    await delete(cid, wallet, subtensor, hotkeys=hotkeys, netuid=229)
 
 
 if __name__ == "__main__":
