@@ -210,7 +210,7 @@ def add_args(cls, parser):
         "--neuron.vpermit_tao_limit",
         type=int,
         help="The maximum number of TAO allowed to query a validator with a vpermit.",
-        default=500,
+        default=100,
     )
     parser.add_argument(
         "--neuron.verbose",

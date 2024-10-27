@@ -204,7 +204,7 @@ class StoreData:
         store_parser.add_argument(
             "--stake_limit",
             type=float,
-            default=500,
+            default=100,
             help="Stake limit to exclude validator axons to query.",
         )
         store_parser.add_argument(
@@ -216,7 +216,7 @@ class StoreData:
         store_parser.add_argument(
             "--neuron.vpermit_tao_limit",
             type=int,
-            default=500,
+            default=100,
             help="Tao limit for the validator permit.",
         )
         store_parser.add_argument(
