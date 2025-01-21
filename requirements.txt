@@ -1,10 +1,10 @@
 torch>=1.13.0
-bcrypt==3.2.0
-bittensor==6.11.1
+bcrypt==3.2.0 #to update to 4.0.0 breaking changes
+bittensor==8.5.2
 redis==5.0.1
-pycryptodome==3.20.0
-pyinstrument==4.6.1
-wandb==0.16.0
+pycryptodome==3.21.0
+pyinstrument==4.7.3
+wandb==0.17.2
 morphys==1.0
 py-multibase==1.0.3
 py-multicodec==0.2.1
@@ -12,7 +12,7 @@ py-multihash==2.0.1
 ipfs-cid==1.0.0
 python-jose==3.3.0
 passlib==1.7.4
-python-multipart==0.0.9
+python-multipart==0.0.20
 python-dotenv==1.0.1
 loguru==0.7.0
-pandas==2.2.0
+pandas==2.2.3

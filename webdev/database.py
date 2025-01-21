@@ -202,7 +202,7 @@ def get_hotkeys_by_cid(cid: str, username: str) -> List[str]:
     md = get_cid_metadata(cid, username)
     return md.get("hotkeys", [])
 
-def get_metagraph(netuid: int = 229, network: str = "finney") -> bt.metagraph:
+def get_metagraph(netuid: int = 229, network: str = "test") -> bt.metagraph:
     metagraph_str = redis_db.get(f"metagraph:{netuid}")
     if metagraph_str:
         metagraph = deserialize_metagraph(metagraph_str.decode())

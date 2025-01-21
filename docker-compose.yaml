@@ -1,9 +1,9 @@
 volumes:
   redis-prod-data:
-    name: "filetao-redis-data"
+    name: "tensorstorage-redis-data"
 
-x-filetao: &filetao
-    image: filetao
+x-tensorstorage: &tensorstorage
+    image: tensorstorage
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,37 +19,37 @@ x-filetao: &filetao
     network_mode: host
 
 services:
-  filetao-miner:
-    <<: *filetao
+  tensorstorage-miner:
+    <<: *tensorstorage
     volumes:
       - ${BT_WALLETS_PATH}:/root/.bittensor/wallets
-      - ${FILETAO_MINER_DATA_DIR}:/root/.data/
+      - ${TENSORSTORAGE_MINER_DATA_DIR}:/root/.data/
     environment:
-      - FILETAO_NODE=miner
+      - TENSORSTORAGE_NODE=miner
     env_file:
       - .env
-      - path: filetao-miner.env
+      - path: tensorstorage-miner.env
         required: false
 
-  filetao-validator:
-    <<: *filetao
+  tensorstorage-validator:
+    <<: *tensorstorage
     depends_on:
-      filetao-api:
+      tensorstorage-api:
         condition: service_started
     environment:
-      - FILETAO_NODE=validator
+      - TENSORSTORAGE_NODE=validator
     env_file:
       - .env
-      - path: filetao-validator.env
+      - path: tensorstorage-validator.env
         required: false
 
-  filetao-api:
-    <<: *filetao
+  tensorstorage-api:
+    <<: *tensorstorage
     environment:
-      - FILETAO_NODE=api
+      - TENSORSTORAGE_NODE=api
     env_file:
       - .env
-      - path: filetao-api.env
+      - path: tensorstorage-api.env
         required: false
 
   redis:

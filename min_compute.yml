@@ -7,7 +7,7 @@
 
 # NOTE: Specification for miners may be different from validators
 
-version: '1.0' # update this version key as needed, ideally should match your release version
+version: '1.0.0' # update this version key as needed, ideally should match your release version
 
 compute_spec:
 
@@ -37,8 +37,8 @@ compute_spec:
       ram_type: "DDR5"     # RAM type (e.g., DDR4, DDR3, etc.)
 
     storage:
-      min_space: 1000          # Minimum free storage space (GB)
-      recommended_space: 10000 # Recommended free storage space (GB)
+      min_space: 1024          # Minimum free storage space (GB)
+      recommended_space: 10240 # Recommended free storage space (GB)
       type: "SSD"              # Preferred storage type (e.g., SSD, HDD)
 
     os:
@@ -72,7 +72,7 @@ compute_spec:
 
     storage:
       min_space: 500           # Minimum free storage space (GB)
-      recommended_space: 1000  # Recommended free storage space (GB)
+      recommended_space: 1024  # Recommended free storage space (GB)
       type: "SSD"              # Preferred storage type (e.g., SSD, HDD)
 
     os:

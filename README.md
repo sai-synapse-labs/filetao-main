@@ -1,82 +1,116 @@
-# FileTAO
+# TensorStorage
 
-[![Latest Version](https://img.shields.io/pypi/v/filetao.svg)](https://pypi.org/project/filetao/)
+<!-- [![Latest Version](https://img.shields.io/pypi/v/filetao.svg)](https://pypi.org/project/filetao/)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/filetao)](https://pypi.org/project/filetao)
 [![License](https://img.shields.io/pypi/l/filetao.svg)](https://github.com/ifrit98/storage-subnet/blob/master/LICENSE)
 
-![Subnet21](assets/Subnet21.png)
+![Subnet21](assets/Subnet21.png) -->
 
-FileTAO (Bittensor Subnet 21) implements a novel, multi-layered zero-knowledge interactive proof-of-spacetime algorithm by cleverly using Pedersen commitments, random challenges leveraging elliptic curve cryptography, sequential seed-based chained hash verification, and merkle proofs to achieve an efficient, robust, secure, and highly available decetralized storage system on the Bittensor network. The system validates on encrypted user data, such that miners are unaware of what data they are storing, and only end-users may encrypt/decrypt the data they provide with their bittensor wallet coldkey.
+TensorStorage implements a novel, multi-layered zero-knowledge interactive proof-of-spacetime algorithm by cleverly using Pedersen commitments, random challenges leveraging elliptic curve cryptography, sequential seed-based chained hash verification, and merkle proofs to achieve an efficient, robust, secure, and highly available decetralized storage system on the Bittensor network. The system validates on encrypted user data, such that miners are unaware of what data they are storing, and only end-users may encrypt/decrypt the data they provide with their bittensor wallet coldkey.
 
 We consider this system to be an important stepping stone so that bittensor can fulfill its mission of democratizing intelligence, and a decentralized AWS platform is a key brick in this wall. 
 
 **NOTICE**: Using this software, you **must** agree to the Terms and Agreements provided in the [terms and conditions](TERMS.md) document. By downloading and running this software, you implicitly agree to these terms and conditions.
 
-Currently supporting `python>=3.9,<3.12`.
+Currently supporting `python>=3.10,<=3.12`.
 
 > Note: The storage subnet is in an alpha stage and is subject to rapid development.
 
-# Table of Contents for Subnet 21 (FileTAO)
-1. [FileTAO Overview](#filetao)
-2. [Installation](#installation)
-   - [Install Redis](#install-redis)
-   - [Secure Redis Configuration](#secure-redis-configuration)
-     - [Close external traffic to Redis](#close-external-traffic-to-redis)
-     - [Automated Redis Password Configuration](#automated-redis-password-configuration)
-     - [Enable persistence](#enable-persistence)
-     - [Redis Troubleshooting](#redis-troubleshooting)
-   - [Install PM2](#install-pm2)
-3. [Storage API](#storage-api)
-   - [Using API Wrappers](#using-api-wrappers)
-   - [Using SubnetsAPI](#using-subnetsapi)
-   - [API Storing Data](#api-storing-data)
-   - [API Retrieving Data](#api-retrieving-data)
-4. [Storage CLI Interface](#storage-cli-interface)
-   - [Commands](#commands)
-     - [Store: Storing Data on the Network](#store-storing-data-on-the-network)
-     - [Retrieve: Retrieving Data from the Network](#retrieve-retrieving-data-from-the-network)
-     - [Listing Stored Data](#listing-stored-data)
-   - [Examples](#examples)
-   - [Miner Statistics](#miner-statistics)
-5. [What is a Decentralized Storage Network (DSN)?](#what-is-a-decentralized-storage-network-dsn)
-   - [Role of a Miner (Prover)](#role-of-a-miner-prover)
-   - [Role of a Validator (Verifier)](#role-of-a-validator-verifier)
-6. [Main Features of Subnet 21](#main-features-of-subnet-21)
-   - [Zero-Knowledge Proof of Space-Time System](#zero-knowledge-proof-of-space-time-system)
-   - [Chained Proof Challenges](#chained-proof-challenges)
-   - [Data Encryption and Zero-Knowledge Proofs for Privacy Preservation](#data-encryption-and-zero-knowledge-proofs-for-privacy-preservation)
-   - [Scalability and Reliability](#scalability-and-reliability)
-   - [Advanced Cryptographic Techniques](#advanced-cryptographic-techniques)
-   - [User-Centric Approach](#user-centric-approach)
-7. [Zero Knowledge Proof-of-Spacetime](#zero-knowledge-proof-of-spacetime)
-   - [Storage Phase](#storage-phase)
-   - [Challenge Phase](#challenge-phase)
-   - [Retrieval Phase](#retrieval-phase)
-8. [Reward System](#reward-system)
-   - [Overview and Justification](#overview-and-justification)
-   - [Speed and Reliability in Decentralized Storage Mining](#speed-and-reliability-in-decentralized-storage-mining)
-   - [Viewing Wandb Runs](#viewing-wandb-runs)
-9. [Epoch UID Selection](#epoch-uid-selection)
-10. [Running FileTAO](#running-filetao)
-    - [Running a Miner](#running-a-miner)
-    - [Running a Validator](#running-a-validator)
+# Table of Contents for TensorStorage
+- [TensorStorage](#tensorstorage)
+- [Table of Contents for TensorStorage](#table-of-contents-for-tensorstorage)
+  - [Installation](#installation)
+    - [Install Redis](#install-redis)
+    - [Secure Redis Configuration](#secure-redis-configuration)
+      - [Automated Redis Password Configuration](#automated-redis-password-configuration)
+      - [Enable persistence](#enable-persistence)
+      - [Redis Troubleshooting](#redis-troubleshooting)
+    - [Install PM2](#install-pm2)
+  - [Storage API](#storage-api)
+    - [Using API Wrappers](#using-api-wrappers)
+    - [Using SubnetsAPI](#using-subnetsapi)
+    - [API Retrieving Data](#api-retrieving-data)
+  - [TensorStorage CLI Interface](#tensorstorage-cli-interface)
+    - [Commands](#commands)
+      - [1. Store: Storing Data on the Network](#1-store-storing-data-on-the-network)
+        - [Subcommands](#subcommands)
+        - [Usage](#usage)
+        - [Options](#options)
+      - [2. Retrieve: Retrieving Data from the Network](#2-retrieve-retrieving-data-from-the-network)
+        - [Subcommands](#subcommands-1)
+        - [Usage](#usage-1)
+        - [Options](#options-1)
+      - [Listing Stored Data](#listing-stored-data)
+        - [Usage](#usage-2)
+        - [Options](#options-2)
+    - [Examples](#examples)
+      - [Storing Data](#storing-data)
+      - [Retrieving Data](#retrieving-data)
+      - [Listing Data](#listing-data)
+    - [Miner statistics](#miner-statistics)
+      - [Options](#options-3)
+      - [Notes](#notes)
+  - [What is a Decentralized Storage Network (DSN)?](#what-is-a-decentralized-storage-network-dsn)
+    - [Role of a Miner (Prover)](#role-of-a-miner-prover)
+    - [Role of a Validator (Verifier)](#role-of-a-validator-verifier)
+  - [Main Features of Subnet 21](#main-features-of-subnet-21)
+    - [Zero-Knowledge Proof of Space-Time System](#zero-knowledge-proof-of-space-time-system)
+    - [Chained Proof Challenges](#chained-proof-challenges)
+    - [Data Encryption and Zero-Knowledge Proofs for Privacy Preservation](#data-encryption-and-zero-knowledge-proofs-for-privacy-preservation)
+    - [Scalability and Reliability](#scalability-and-reliability)
+    - [Advanced Cryptographic Techniques](#advanced-cryptographic-techniques)
+    - [User-Centric Approach](#user-centric-approach)
+  - [Zero Knowledge Proof-of-Spacetime](#zero-knowledge-proof-of-spacetime)
+    - [Storage Phase](#storage-phase)
+    - [Challenge Phase](#challenge-phase)
+    - [Retrieval Phase](#retrieval-phase)
+  - [Reward System](#reward-system)
+    - [Overview and Justification](#overview-and-justification)
+    - [**Wilson Score**](#wilson-score)
+    - [**monitor**](#monitor)
+    - [Tier System:](#tier-system)
+      - [Maintaining and Advancing Tiers:](#maintaining-and-advancing-tiers)
+      - [Miner Advancement Program](#miner-advancement-program)
+      - [Periodic Statistics Rollover](#periodic-statistics-rollover)
+    - [Speed and Reliability in Decentralized Storage Mining](#speed-and-reliability-in-decentralized-storage-mining)
+      - [Importance of Speed:](#importance-of-speed)
+      - [Importance of Reliability:](#importance-of-reliability)
+      - [Reward Scaling Mechanism:](#reward-scaling-mechanism)
+    - [Viewing Wandb Runs](#viewing-wandb-runs)
+  - [Epoch UID selection](#epoch-uid-selection)
+  - [Running TensorStorage](#running-tensorstorage)
+    - [Running a miner](#running-a-miner)
+      - [Data migration](#data-migration)
+    - [Running a validator](#running-a-validator)
     - [Running the API](#running-the-api)
+      - [Options](#options-4)
     - [Setup WandB](#setup-wandb)
+      - [Step 1: Installation of WANDB](#step-1-installation-of-wandb)
+      - [Step 2: Obtain Your API Key](#step-2-obtain-your-api-key)
+      - [Step 3: Setting Up the API Key in Ubuntu](#step-3-setting-up-the-api-key-in-ubuntu)
+      - [Compute Requirements](#compute-requirements)
     - [Testnet](#testnet)
-11. [Local Subtensor](#local-subtensor)
-12. [Database Schema Migration](#database-schema-migration)
-13. [Disable RDB](#disable-rdb)
-14. [FileTAO Docker](#filetao-docker)
-15. [Demos](#demo-notebooks-and-examples)
+    - [Local Subtensor](#local-subtensor)
+      - [Docker installation](#docker-installation)
+      - [Manual Installation](#manual-installation)
+  - [Database Schema Migration](#database-schema-migration)
+  - [Backup](#backup)
+  - [Usage](#usage-3)
+    - [Script 1 Example](#script-1-example)
+    - [Script 2 Example](#script-2-example)
+      - [Important Notes](#important-notes)
+  - [Disable RDB](#disable-rdb)
+  - [TensorStorage Docker](#tensorstorage-docker)
+    - [Run TensorStorage with docker](#run-tensorstorage-with-docker)
 
 ## Installation
 ```bash
 # Please install torch-cpu if you do not need a gpu. (GPU not required for FileTAO)
 pip install torch==2.3.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
-# Clone and Install the FileTAO repo.
-git clone https://github.com/ifrit98/storage-subnet
-cd storage-subnet
+# Clone and Install the TensorStorage repo.
+# git clone https://github.com/ifrit98/storage-subnet
+# cd storage-subnet
 python -m pip install -e .
 ```
 
@@ -102,7 +136,7 @@ Ensure the local Redis server is started.
 sudo systemctl status redis-server.service
 ```
 
-You should see output like:
+you should see output like:
 ```
 ● redis-server.service - Advanced key-value store
      Loaded: loaded (/lib/systemd/system/redis-server.service; disabled; vendor preset: enabled)
@@ -208,16 +242,16 @@ sudo npm install pm2 -g
 
 ## Storage API
 
-There are three (3) main ways you can interact with the `FileTao` network to store and retrieve data. (4th coming soon through the website interface!):
+There are three (3) main ways you can interact with the `TensorStorage` network to store and retrieve data. (4th coming soon through the website interface!):
 
 1. API Wrappers (python) - this is the most convenient way for developers to interact
-2. SubnetsAPI (lower-level python) - if you need more control over how you interface with FileTao
-3. FileTao CLI (command-line) - most convenient for non-developers just wanting to store files using the cli
+2. SubnetsAPI (lower-level python) - if you need more control over how you interface with TensorStorage
+3. TensorStorage CLI (command-line) - most convenient for non-developers just wanting to store files using the cli
 
 The following three sections will describe each of these in more detail.
 
 ### Using API Wrappers
-There are two high-level wrapper functions that allow easy access to FileTao's storage mechanism through bittensor abstractions, `store` and `retrieve`.
+There are two high-level wrapper functions that allow easy access to TensorStorage's storage mechanism through bittensor abstractions, `store` and `retrieve`.
 
 It's as convenient as importing, preparing data, and firing away:
 ```python
@@ -243,7 +277,7 @@ print(data)
 ```
 
 ### Using SubnetsAPI 
-In addition to the convenience wrappers and command-line interface, FileTao can be accessed via the bittensor subnets python API.
+In addition to the convenience wrappers and command-line interface, TensorStorage can be accessed via the bittensor subnets python API.
 
 The subnets API requires two abstract functions to be implemented: `prepare_synapse`, and `process_responses`. This allows for all subnets to be queried through exposed axons, typically on the validator side.
 
@@ -259,7 +293,7 @@ wallet = bt.wallet(name="sn21", hotkey="query")
 store = StoreUserAPI(wallet)
 ```
 
-Here is a complete example to store data on `FileTao` programmatically.
+Here is a complete example to store data on `TensorStorage` programmatically.
 
 ```python
 import bittensor as bt
@@ -311,15 +345,15 @@ print(data)
 > b"\x12 K\x1b\x80\x9cr\xce\x0e\xf8\xd8\x15\x`"...
 ```
 
-## Storage CLI Interface
+## TensorStorage CLI Interface
 
-The Storage CLI provides a user-friendly command-line interface for storing and retrieving data on the Bittensor network. It simplifies the process of data encryption, storage, and retrieval, ensuring security and ease of use. This tool is ideal for users who need to manage data securely on a decentralized network.
+The TensorStorage CLI provides a user-friendly command-line interface for storing and retrieving data on the Bittensor network. It simplifies the process of data encryption, storage, and retrieval, ensuring security and ease of use. This tool is ideal for users who need to manage data securely on a decentralized network.
 
-The FileTao storage cli uses IPFS content identifiers (`CIDs`) to identify storage on the network. This has several advantages over using simple hashes of the data, as a way of providing a more robust and verifiable way of identifying and retrieving data. 
+The TensorStorage CLI uses IPFS content identifiers (`CIDs`) to identify storage on the network. This has several advantages over using simple hashes of the data, as a way of providing a more robust and verifiable way of identifying and retrieving data. 
 
 Unlike simple hashes, which only represent the content, CIDs in IPFS (InterPlanetary File System) are more comprehensive. They contain not only a hash of the content but also information about the hashing algorithm and encoding used. This makes CIDs self-describing and ensures that the data retrieved is exactly what was stored, without any alterations.
 
-The benefits of using CIDs in the FileTao Storage CLI on Bittensor include:
+The benefits of using CIDs in the TensorStorage CLI on Bittensor include:
 
 1. Content Addressing: CIDs allow for content-based addressing rather than location-based addressing. This means that the content itself, rather than its location on a specific server, is used to reference and access the data. This approach is inherently more secure and decentralized.
 1. Version Control and Deduplication: Since CIDs change with even the slightest alteration in the content, they naturally support version control. Moreover, the use of CIDs facilitates deduplication, as the same content stored multiple times will have the same CID, saving space and reducing redundancy on the network.
@@ -327,7 +361,7 @@ The benefits of using CIDs in the FileTao Storage CLI on Bittensor include:
 1. Future-Proofing: The CID system is designed to be future-proof. As new hashing algorithms and encodings emerge, CIDs can adapt to include this new information without disrupting the existing system. This ensures long-term viability of the storage system on the Bittensor network.
 1. Immutable and Tamper-Proof: The use of CIDs ensures immutability and tamper-proofing of data. Since the CID is a unique identifier for a specific version of the content, any changes in the content result in a different CID. This makes it easy to verify the integrity of the data and detect any unauthorized modifications.
 
-CIDs can also be generated using the FileTao repo directly that have parity with IPFS out-of-the box. You can generate CIDv1 by calling `make_cid(data: Union[str,bytes])`
+CIDs can also be generated using the TensorStorage repo directly that have parity with IPFS out-of-the box. You can generate CIDv1 by calling `make_cid(data: Union[str,bytes])`
 
 ```python
 from storage.validator.cid import make_cid
@@ -363,7 +397,7 @@ This command encrypts and stores data on the Bittensor network.
 
 ##### Usage
 ```bash
-filetao store put --filepath <path-to-data> [options]
+ts store put --filepath <path-to-data> [options]
 ```
 
 ##### Options
@@ -382,7 +416,7 @@ This command retrieves previously stored data from the Bittensor network.
 
 ##### Usage
 ```bash
-filetao retrieve get --data_hash <hash> [options]
+ts retrieve get --data_hash <hash> [options]
 ```
 
 ##### Options
@@ -398,7 +432,7 @@ Lists all data hashes stored on the network associated with the specified coldke
 
 ##### Usage
 ```bash
-filetao retrieve list [options]
+ts retrieve list [options]
 ```
 
 ##### Options
@@ -409,17 +443,17 @@ filetao retrieve list [options]
 
 #### Storing Data
 ```bash
-filetao store put --filepath ./example.txt --wallet.name mywallet --wallet.hotkey myhotkey
+ts store put --filepath ./example.txt --wallet.name mywallet --wallet.hotkey myhotkey
 ```
 
 #### Retrieving Data
 ```bash
-filetao retrieve get --data_hash 123456789 --storage_basepath ./retrieved --wallet.name mywallet --wallet.hotkey myhotkey
+ts retrieve get --data_hash 123456789 --storage_basepath ./retrieved --wallet.name mywallet --wallet.hotkey myhotkey
 ```
 
 #### Listing Data
 ```bash
-filetao retrieve list --wallet.name mywallet
+ts retrieve list --wallet.name mywallet
 ```
 
 ![list](assets/list.png)
@@ -430,7 +464,7 @@ filetao retrieve list --wallet.name mywallet
 If you are running a validator and have a locally running instance of Redis, you may use this command to view the miner statistics gathered. This command will display a list of all hotkeys and their associated statistics, such as `total successes`, `attempts` vs `successes` for each category, `tier`, `current storage`, and `total storage limit`.
 
 ```bash
-filetao miner stats --index 0
+ts miner stats --index 0
 ```
 ![stats](assets/miner_stats.png)
 
@@ -585,12 +619,12 @@ There are several components to the reward mechanism and is multi-layered. In a 
 - Incentivize good performance over a long period of time. (Tier system to reward based on reputation.)
 - Incentivize fast response times. We want to retrieve user data quickly and ensure that it is over high network bandwidth.
 
-In FileTAO's decentralized storage system, optimal behavior is crucial for the overall health and efficiency of the network. Miners play a vital role in maintaining this ecosystem, and their actions directly impact their rewards and standing within the subnet. We have implemented a tier-based reward system to encourage proper behavior, successful challenge completions, and consistent performance.
+In TensorStorage's decentralized storage system, optimal behavior is crucial for the overall health and efficiency of the network. Miners play a vital role in maintaining this ecosystem, and their actions directly impact their rewards and standing within the subnet. We have implemented a tier-based reward system to encourage proper behavior, successful challenge completions, and consistent performance.
 
 Failing to pass either challenge or retrieval verifications incur negative rewards. This is doubly destructive, as rolling statistics are continuously logged to periodically compute which tier a given miner hotkey belongs to. When a miner achieves the threshold for the next tier, the rewards that miner receives proportionally increase. Conversely, when a miner drops below the threshold of the previous tier, that miner's rewards are slashed such that they receive rewards proportionally to the immediately lower tier.
 
 ### Overview and Justification
-FileTAO's Multi-dimensional reward mechanism is spread across 4 main axes:
+TensorStorage's Multi-dimensional reward mechanism is spread across 4 main axes:
 (1) Availability: Is the miner reachable when requested? Incentivizes uptime.
 (2) Speed (performant): how fast was the normalized response time?
 (3) Correctness (reliable): did the proof succeed? y/n
@@ -598,7 +632,7 @@ FileTAO's Multi-dimensional reward mechanism is spread across 4 main axes:
 
 The main drivers behind the reward mechanism are to model meritocratic systems as seen in the academic realm and in the business world that scales trust across time and observation of output. For example, we create various "tiers" in education, Undergraduate, Masters, PhD, Post Doc, or in software, Junior Engineer, Senior Engineer, Principal Engineer, Staff Engineer, etc where each subsequent level achieved has proportionally greater expecetations on performance and qualification of the individual. 
 
-However, performance of the individual must match the expectations of the pedigree, and behavior that is inconsistent with a given level will be adjusted. If, for example, a Junior Engineer proves their output is substantial and over time completes projects that provide value, that engineer will be promoted to Senior Engineer over time, and pontentially beyond. Conversely, a Principal Engineer that consistently underperforms expectations will be demoted to a role with lower expectations until able to prove otherwise. The same logic applies to miners in FileTAO (SN21).
+However, performance of the individual must match the expectations of the pedigree, and behavior that is inconsistent with a given level will be adjusted. If, for example, a Junior Engineer proves their output is substantial and over time completes projects that provide value, that engineer will be promoted to Senior Engineer over time, and pontentially beyond. Conversely, a Principal Engineer that consistently underperforms expectations will be demoted to a role with lower expectations until able to prove otherwise. The same logic applies to miners in TensorStorage.
 
 Tier (class) mobility is at the heart of the mechanism, and provides a balance between competition and trust, where over time competitiveness breeds a degree of trust on which we can associate a degree of reliability with a given entity (or miner).
 
@@ -722,7 +756,7 @@ Concretely, a `Bronze` miner who is one of the top 2 within a batch of requests 
 ```
 REWARD = TIER * REWARD * BOOST
 Bronze  -> 0.72 = 0.6 * 1.0 * 1.2
-Diamond -> 0.84 = 0.8 * 1.0 * 1.05
+Diamond -> 0.84 = 0.8 * 1.0 * 1.08
 ```
 
 This mechanism *significantly* closes the gap for newer miners who perform well and should be able to ascend the tier structure honestly and faithfully. This is such that miners who consistently perform well but are lower tiers can more readily survive immunity period to make it to successively higher tiers and not "gate" access to the older miners. This directly negates the "grandfathering" effect. Higher tier miners that are in the top 2 are boosted significantly less than those Bronze or lower tier miners who make the top 2.
@@ -761,7 +795,7 @@ total_successes = 6851 # + 9 by aggregating total successs previous 2 epochs
 
 ### Speed and Reliability in Decentralized Storage Mining
 
-In the context of FileTAO's decentralized storage system, speed and reliability are critical factors that significantly influence the performance and reputation of miners. These factors not only affect the efficiency of data storage and retrieval but also play a crucial role in the overall user experience and the robustness of the network.
+In the context of TensorStorage's decentralized storage system, speed and reliability are critical factors that significantly influence the performance and reputation of miners. These factors not only affect the efficiency of data storage and retrieval but also play a crucial role in the overall user experience and the robustness of the network.
 
 #### Importance of Speed:
 1. **Quick Data Access:** Fast response times in data storage and retrieval operations are essential for a seamless user experience. Miners with quicker response times enhance the network's ability to serve data efficiently.
@@ -796,10 +830,10 @@ reward
 > 0.7 | -0.035 # harsher punishment for higher tier failure
 ```
 
-The tier system in FileTAO's decentralized storage network plays a pivotal role in ensuring the network's efficiency and reliability. By setting clear performance benchmarks and rewarding miners accordingly, the system fosters a competitive yet fair environment. This encourages continuous improvement among miners, ultimately leading to a robust and trustworthy decentralized storage solution.
+The tier system in TensorStorage's decentralized storage network plays a pivotal role in ensuring the network's efficiency and reliability. By setting clear performance benchmarks and rewarding miners accordingly, the system fosters a competitive yet fair environment. This encourages continuous improvement among miners, ultimately leading to a robust and trustworthy decentralized storage solution.
 
 ### Viewing Wandb Runs
-You can view validator provided run data on wandb by viewing the project found at this [link](https://wandb.ai/philanthrope/philanthropic-thunder/table). This provides information on miner statistics and tier level available to the public.
+<!-- You can view validator provided run data on wandb by viewing the project found at this [link](https://wandb.ai/philanthrope/philanthropic-thunder/table). This provides information on miner statistics and tier level available to the public. -->
 
 ## Epoch UID selection
 Miners are chosen pseudorandomly using the current block hash as a random seed. This allows for public verification of which miners are selected for each challenge round (3 blocks).
@@ -816,8 +850,8 @@ miner_uids
 ```
 
 
-## Running FileTao
-FileTao is made up of both miners and validators, both of which are responsible for proper functioning of the network. Miners are the nodes that store and provide data availability, while validators are indexers and verifier nodes who challenge the miners to ensure the health and consistency of the network.
+## Running TensorStorage
+TensorStorage is made up of both miners and validators, both of which are responsible for proper functioning of the network. Miners are the nodes that store and provide data availability, while validators are indexers and verifier nodes who challenge the miners to ensure the health and consistency of the network.
 
 
 ### Running a miner
@@ -922,7 +956,7 @@ This way you are able to run your process from anywhere and not rely on relative
 
 ### Running the API
 
-Running an API node at `neurons.api.py` allows you to create an entry node into the FileTao network for storing data. This can be connected to a back-end service, or used similarly to an IPFS node as an entrypoint for public use.
+Running an API node at `neurons.api.py` allows you to create an entry node into the TensorStorage's network for storing data. This can be connected to a back-end service, or used similarly to an IPFS node as an entrypoint for public use.
 
 It is important to run an API to improve decentralization of the network and allow for a greater surface area of queryable nodes for end users.
 
@@ -1006,11 +1040,11 @@ See [`min_compute.yml`](min_compute.yml) for complete details on minimum and rec
 
 
 ### Testnet
-FileTao runs a testnet to deploy miners and try out miners on `netuid 22`. 
+TensorStorage runs a testnet to deploy miners and try out miners on `netuid 229`. 
 
 You can access this testnet by adding these to your script:
 ```
---subtensor.network test --netuid 22
+--subtensor.network test --netuid 229
 ```
 
 ### Local Subtensor
@@ -1085,7 +1119,7 @@ pm2 logs subtensor
 
 ## Database Schema Migration
 
-As over version `1.5.3` FileTao has a new miner database schema to work with the API. It is REQUIRED to update the schema for proper functioning of the FileTao network to participate. This tool will help you convert if you have data from <`1.5.3`.
+As over version `1.5.3` TensorStorage has a new miner database schema to work with the API. It is REQUIRED to update the schema for proper functioning of the TensorStorage network to participate. This tool will help you convert if you have data from <`1.5.3`.
 
 Converts the schema of a Redis database to the new hotkey format. It automates the process of checking the environment for necessary configurations and performing the schema conversion on the specified Redis database, as well as cleanup after conversion (separate script).
 
@@ -1166,13 +1200,13 @@ bash ./scripts/redis/disable_rdb.sh $REDIS_PATH
 ```
 
 
-## FileTAO Docker
+## TensorStorage Docker
 
-FileTao is now able to run with docker with miner, validator, and api nodes. If running a validator, API nodes are *automatically* deployed in a separate container.
+TensorStorage is now able to run with docker with miner, validator, and api nodes. If running a validator, API nodes are *automatically* deployed in a separate container.
 
 You are free to use this provided docker convenience but may still run nodes on bare-metal. However, it is recommended to upgrade to build and use these docker images, as they are generally more secure and convenient to use.
 
-### Run filetao with docker
+### Run TensorStorage with docker
 
 To run the suite of services (miner, validator, and redis), first run:
 
@@ -1192,9 +1226,9 @@ docker-compose up
 To run only an individual service (e.g. miner and validator), use:
 
 ```
-docker compose up --build {filetao-miner, filetao-validator}
+docker compose up --build {tensorstorage-miner, tensorstorage-validator}
 ```
 
-### Demo notebooks and examples
+<!-- ### Demo notebooks and examples
 
-See [`storage/api/demo_notebook.ipynb`]("docs/api_demo.ipynb") and [`storage/api/example.py`]("storage/api/example.py") To learn different ways to query the subnet.
+See [`storage/api/demo_notebook.ipynb`]("docs/api_demo.ipynb") and [`storage/api/example.py`]("storage/api/example.py") To learn different ways to query the subnet. -->

@@ -1,10 +1,10 @@
-### Terms of Service for FileTAO storage
+### Terms of Service for TensorStorage
 
-**Last Updated: [11/18/2023]**
+**Last Updated: [21/01/2025]**
 
 #### Introduction
 
-Welcome to FileTAO storage (“Service”). These Terms of Service (“Terms”) govern your access to and use of our services, including any applications, websites, software, and content provided on or through [Your Service URL]. By using our Service, you agree to be bound by these Terms. If you do not agree to these Terms, do not use our Service.
+Welcome to TensorStorage (“Service”). These Terms of Service (“Terms”) govern your access to and use of our services, including any applications, websites, software, and content provided on or through [Your Service URL]. By using our Service, you agree to be bound by these Terms. If you do not agree to these Terms, do not use our Service.
 
 #### 1. Acceptance of Terms
 
@@ -38,7 +38,7 @@ We shall not be liable for any indirect, incidental, special, consequential, or 
 
 #### 8. Indemnification
 
-You agree to indemnify, defend, and hold harmless FileTAO, its officers, directors, employees, agents, licensors, suppliers, and any third-party information providers from and against all losses, expenses, damages, and costs, including reasonable attorneys' fees, resulting from any violation of these Terms or any activity related to your account (including negligent or wrongful conduct).
+You agree to indemnify, defend, and hold harmless TensorStorage, its officers, directors, employees, agents, licensors, suppliers, and any third-party information providers from and against all losses, expenses, damages, and costs, including reasonable attorneys' fees, resulting from any violation of these Terms or any activity related to your account (including negligent or wrongful conduct).
 
 #### 9. Governing Law
 
@@ -46,4 +46,4 @@ These Terms shall be governed and construed in accordance with the laws of your 
 
 #### 10. Contact Us
 
-If you have any questions about these Terms, please contact us at [FileTAO21@gmail.com].
+If you have any questions about these Terms, please contact us at [sai@synapselabsdev.com].

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 # Copyright © 2023 Yuma Rao
-# Copyright © 2024 Synapse Labs Corp.
+# Copyright © 2025 Synapse Labs Corp.
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the “Software”), to deal in the Software without restriction, including without limitation
@@ -61,9 +61,9 @@ with codecs.open(
     version_string = version_match.group(1)
 
 setup(
-    name="TensorDrive",
+    name="TensorStorage",
     version=version_string,
-    description="Decentralised storage for the masses. (TensorDrive)",
+    description="Decentralised storage for the masses. (TensorStorage)",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="",
@@ -72,10 +72,10 @@ setup(
     include_package_data=True,
     author_email="sai@synapselabsdev.com",
     license="MIT",
-    python_requires=">=3.9,<3.12",
+    python_requires=">=3.10,<=3.12",
     entry_points={
         "console_scripts": [
-            "filetao=storage.cli.cli:filetao"
+            "ts=storage.cli.cli:ts"
         ]
     },
     install_requires=requirements,

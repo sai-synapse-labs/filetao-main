@@ -1,4 +1,4 @@
-# Changelog
+<!-- # Changelog
 
 ## 3.0.0 / 2024-04-30
 
@@ -478,4 +478,4 @@
 * up ping timeout limit, caused issues with incorrectly flagging UIDs as down
 * bugfix in verify store with miners no longer returning data, verify on validator side with seed
 * increase challenge timeout
-* update version key
+* update version key -->

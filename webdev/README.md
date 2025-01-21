@@ -1,6 +1,6 @@
-## FileTAO Backend
+## TensorStorage Backend
 
-We have open sourced the backend for FileTAO for those who wish to build upon their validator.
+We have open sourced the backend for TensorStorage for those who wish to build upon their validator.
 
 Feel free to use, modify, or monetize this code without restriction.
 
@@ -9,9 +9,9 @@ Feel free to use, modify, or monetize this code without restriction.
 # Install torch-cpu
 pip install torch==2.3.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
-# Install FileTAO
-git clone https://github.com/ifrit98/storage-subnet
-cd storage-subnet
+# Install TensorStorage
+# git clone https://github.com/ifrit98/storage-subnet
+# cd storage-subnet
 python -m pip install -e .
 
 # Update FastAPI to the latest version
