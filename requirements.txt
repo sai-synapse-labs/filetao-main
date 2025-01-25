@@ -1,6 +1,8 @@
-torch>=2.0.0
+torch==2.0.0
 bcrypt==3.2.0 #to update to 4.0.0 breaking changes
 bittensor==8.5.2
+bittensor-cli==8.4.3
+bittensor-wallet==3.0.0
 redis==5.0.1
 pycryptodome==3.21.0
 pyinstrument==4.7.3
@@ -17,3 +19,4 @@ python-dotenv==1.0.1
 loguru==0.7.0
 pandas==2.2.3
 numpy==2.0.2
+tqdm==4.66.0

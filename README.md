@@ -110,7 +110,8 @@ pip install torch==2.3.0+cpu -f https://download.pytorch.org/whl/torch_stable.ht
 
 # Clone and Install the TensorStorage repo.
 # git clone https://github.com/ifrit98/storage-subnet
-# cd storage-subnet
+git clone https://github.com/sai-synapse-labs/filetao-main
+cd filetao-main
 python -m pip install -e .
 ```
 

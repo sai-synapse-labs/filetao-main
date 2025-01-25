@@ -38,7 +38,7 @@ from .default_values import defaults
 
 
 # Create a console instance for CLI display.
-console = bittensor.__console__
+console = bittensor.logging.set_console()
 
 
 
@@ -132,7 +132,7 @@ class RetrieveData:
         r"""Retrieve data from the Bittensor network for the given data_hash."""
 
         success = False
-        with bittensor.__console__.status(":satellite: Retreiving data..."):
+        with bittensor.logging.set_info(":satellite: Retreiving data..."):
 
             data = await retrieve(
                 cli.config.cid,

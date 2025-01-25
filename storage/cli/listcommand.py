@@ -28,7 +28,7 @@ from rich.table import Table
 from tqdm import tqdm
 
 # Create a console instance for CLI display.
-console = bittensor.__console__
+console = bittensor.logging.set_console()
 
 
 def get_coldkey_wallets_for_path(path: str) -> List["bittensor.wallet"]:

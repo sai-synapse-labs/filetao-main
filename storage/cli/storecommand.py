@@ -44,7 +44,7 @@ bittensor.trace()
 
 
 # Create a console instance for CLI display.
-console = bittensor.__console__
+console = bittensor.logging.set_console()
 
 
 
@@ -121,7 +121,7 @@ class StoreData:
         r"""Store data from local disk on the Bittensor network."""
 
         success = False
-        with bittensor.__console__.status(":satellite: Storing data..."):
+        with bittensor.logging.set_info(":satellite: Storing data..."):
 
             data_hash, stored_hotkeys = await store(
                     data=raw_data,
