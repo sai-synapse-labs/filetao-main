@@ -5,14 +5,14 @@
 
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the “Software”), to deal in the Software without restriction, including without limitation
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
 # the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
 # and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of
 # the Software.
 
-# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 # THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
@@ -118,7 +118,7 @@ def get_sorted_response_times(uids, responses, max_time: float):
     ]
     # Sorting in ascending order since lower process time is better
     sorted_axon_times = sorted(axon_times, key=lambda x: x[1])
-    bt.logging.debug(f"sorted_axon_times: {sorted_axon_times}")
+    bt.logging.info(f"sorted_axon_times: {sorted_axon_times}")
     return sorted_axon_times
 
 
@@ -153,27 +153,27 @@ def scale_rewards(
             if response.dendrite.process_time is not None
         ] or [1] # nobody responded successfully
     )
-    bt.logging.trace(f"max response time: {max_time}")
+    bt.logging.debug(f"max response time: {max_time}")
 
     sorted_axon_times = get_sorted_response_times(uids, responses, max_time=max_time)
 
     # Extract only the process times
     process_times = [proc_time for _, proc_time in sorted_axon_times]
-    bt.logging.trace(f"process times: {process_times}")
+    bt.logging.debug(f"process times: {process_times}")
     if process_times == []: # is empty
         bt.logging.warning(f"No one returned successfully. 0 reward across the board.")
         return [0.0 for _ in rewards]
 
     # Apply logarithmic scaling to data sizes
-    bt.logging.trace(f"Unnormalized data sizes: {data_sizes}")
+    bt.logging.debug(f"Unnormalized data sizes: {data_sizes}")
     log_data_sizes_np = np.log1p(data_sizes)
-    bt.logging.trace(f"Logarithmically scaled data sizes: {log_data_sizes_np}")
+    bt.logging.debug(f"Logarithmically scaled data sizes: {log_data_sizes_np}")
 
     # Normalize the response times by data size (unit time)
     data_normalized_process_times = np.asarray(np.array(process_times) / log_data_sizes_np)
 
     # Normalize the response times
-    bt.logging.trace(f"data_normalized_process_times: {data_normalized_process_times}")
+    bt.logging.debug(f"data_normalized_process_times: {data_normalized_process_times}")
     normalized_times = sigmoid_normalize(data_normalized_process_times, max(data_normalized_process_times) * 2)
 
     # Create a dictionary mapping UIDs to normalized times
@@ -192,7 +192,7 @@ def scale_rewards(
 
     # Final normalization if needed
     rescale_factor = torch.sum(rewards) / torch.sum(time_scaled_rewards)
-    bt.logging.trace(f"Rescale factor: {rescale_factor}")
+    bt.logging.debug(f"Rescale factor: {rescale_factor}")
     scaled_rewards = [reward * rescale_factor for reward in time_scaled_rewards]
 
     return scaled_rewards
@@ -217,9 +217,9 @@ def apply_reward_scores(
         data_sizes (List[float]): The size of each data piece used for the forward pass.
     """
     if self.config.neuron.verbose:
-        bt.logging.debug(f"Applying rewards: {rewards}")
-        bt.logging.debug(f"Reward shape: {rewards.shape}")
-        bt.logging.debug(f"UIDs: {uids}")
+        bt.logging.info(f"Applying rewards: {rewards}")
+        bt.logging.info(f"Reward shape: {rewards.shape}")
+        bt.logging.info(f"UIDs: {uids}")
 
     # Scale rewards based on response times
     scaled_rewards = scale_rewards(
@@ -232,7 +232,7 @@ def apply_reward_scores(
     scaled_rewards = torch.tensor(scaled_rewards).type(
         torch.FloatTensor
     )  # Ensure same type as rewards
-    bt.logging.debug(f"Normalized rewards: {scaled_rewards}")
+    bt.logging.info(f"Normalized rewards: {scaled_rewards}")
 
     # Compute forward pass rewards
     # shape: [ metagraph.n ]
@@ -245,7 +245,7 @@ def apply_reward_scores(
         )
         .to(self.device)
     )
-    bt.logging.trace(f"Scattered rewards: {scattered_rewards}")
+    bt.logging.debug(f"Scattered rewards: {scattered_rewards}")
 
     # Update moving_averaged_scores with rewards produced by this step.
     # shape: [ metagraph.n ]
@@ -253,7 +253,7 @@ def apply_reward_scores(
     self.moving_averaged_scores: torch.FloatTensor = alpha * scattered_rewards + (
         1 - alpha
     ) * self.moving_averaged_scores.to(self.device)
-    bt.logging.trace(f"Updated moving avg scores: {self.moving_averaged_scores}")
+    bt.logging.debug(f"Updated moving avg scores: {self.moving_averaged_scores}")
 
 
 async def create_reward_vector(
@@ -291,15 +291,15 @@ async def create_reward_vector(
         response.dendrite.process_time or synapse.timeout
         for response in responses
     ]
-    bt.logging.debug(f"Dendrite Times: {times}")
+    bt.logging.info(f"Dendrite Times: {times}")
     sorted_times = sorted(list(zip(uids, times)), key=lambda x: x[1])
 
-    bt.logging.debug(f"Sorted Times: {sorted_times}")
+    bt.logging.info(f"Sorted Times: {sorted_times}")
     in_top_2_dict = {
         uid: True if time < synapse.timeout else False
         for (uid, time) in sorted_times[:2]
     }
-    bt.logging.debug(f"Is Top 2 Dict: {pformat(in_top_2_dict)}")
+    bt.logging.info(f"Is Top 2 Dict: {pformat(in_top_2_dict)}")
 
     for idx, (uid, response) in enumerate(zip(uids, responses)):
         # Verify the commitment
@@ -308,7 +308,7 @@ async def create_reward_vector(
         # Determine if the commitment is valid
         success = verify_fn(synapse=response)
         if success:
-            bt.logging.debug(
+            bt.logging.info(
                 f"Successfully verified {synapse.__class__} commitment from UID: {uid} | hotkey: {hotkey}"
             )
             await callback(hotkey, idx, uid, response)

@@ -51,7 +51,7 @@ class StorageVersion:
         )
 
 
-__version__ = "3.0.0"
+__version__ = "1.0.0"
 version = StorageVersion.from_string(__version__)
 __spec_version__ = version.to_spec_version()
 

@@ -1,4 +1,4 @@
-torch>=1.13.0
+torch>=2.0.0
 bcrypt==3.2.0 #to update to 4.0.0 breaking changes
 bittensor==8.5.2
 redis==5.0.1
@@ -16,3 +16,4 @@ python-multipart==0.0.20
 python-dotenv==1.0.1
 loguru==0.7.0
 pandas==2.2.3
+numpy==2.0.2

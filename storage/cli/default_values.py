@@ -26,7 +26,7 @@ defaults: Munch = munchify(
         "hash_basepath": "~/.bittensor/hashes",
         "storage_basepath": "~/.bittensor/storage",
         "netuid": "229",
-        "subtensor": {"network": "test", "chain_endpoint": None, "_mock": False},
+        "subtensor": {"network": "test", "chain_endpoint": 'test.finney.opentensor.ai:443', "_mock": False},
         "wallet": {
             "name": "default",
             "hotkey": "default",

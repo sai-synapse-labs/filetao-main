@@ -144,8 +144,8 @@ class cli:
         """
         # Define the basic argument parser.
         parser = argparse.ArgumentParser(
-            description=f"FileTAO cli v{storage.__version__}",
-            usage="ftcli <command> <command args>",
+            description=f"TensorStorage cli v{storage.__version__}",
+            usage="tscli <command> <command args>",
             add_help=True,
         )
         # Add arguments for each sub-command.
@@ -237,7 +237,7 @@ class cli:
 async def async_main(config):
     await cli(config=config).run()
 
-def filetao():
+def ts():
     args = sys.argv[1:]
     config = cli.create_config(args)
     asyncio.run(async_main(config=config))

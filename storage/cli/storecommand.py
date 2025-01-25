@@ -72,7 +72,7 @@ class StoreData:
     - The unique data hash generated upon successful storage.
 
     Example usage:
-    >>> ftcli store put --filepath "/path/to/data.txt"
+    >>> tscli store put --filepath "/path/to/data.txt"
 
     Note:
     This command is vital for users who need to store data on the Bittensor network securely.

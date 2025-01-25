@@ -64,7 +64,7 @@ class RetrieveData:
     - Location where the retrieved data is saved (if successful).
 
     Example usage:
-    >>> ftcli retrieve get --data_hash "123abc"
+    >>> tscli retrieve get --data_hash "123abc"
 
     Note:
     This command is essential for individuals and applications that require access to specific data from the Bittensor network.
@@ -169,7 +169,7 @@ class RetrieveData:
                 "Enter netuid",
                 default=defaults.netuid
                 if config.subtensor.network == "finney"
-                else "22",
+                else "229",
             )
             config.netuid = str(netuid)
 

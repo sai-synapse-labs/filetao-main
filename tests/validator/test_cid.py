@@ -44,6 +44,7 @@ class TestIPFSCID(unittest.TestCase):
         cid1_3 = make_cid(data)
         self.assertEqual(decode_cid(cid1_3), expected_v1_hash)
         cid1_4 = make_cid(data)
+        self.assertEqual(decode_cid(cid1_4), expected_v1_hash)
 
 
 if __name__ == "__main__":
