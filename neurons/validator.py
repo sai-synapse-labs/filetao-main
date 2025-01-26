@@ -24,6 +24,7 @@ import asyncio
 from redis import asyncio as aioredis
 import threading
 import bittensor as bt
+from bittensor.core import settings
 import subprocess
 from shlex import quote
 from copy import deepcopy
@@ -346,10 +347,10 @@ class neuron:
         Starts the subscription handler in a background thread.
         """
         substrate = SubstrateInterface(
-            ss58_format=bt.__ss58_format__,
+            ss58_format=settings.SS58_FORMAT,
             use_remote_preset=True,
             url=self.subtensor.chain_endpoint,
-            type_registry=bt.__type_registry__,
+            type_registry=settings.TYPE_REGISTRY,
         )
         self.subscription_substrate = substrate
 
