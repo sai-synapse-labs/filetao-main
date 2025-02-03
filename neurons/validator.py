@@ -31,7 +31,7 @@ from pprint import pformat
 from traceback import print_exception
 from substrateinterface.base import SubstrateInterface
 from dotenv import load_dotenv
-
+from bittensor.core.settings import SS58_FORMAT, TYPE_REGISTRY
 from storage.shared.utils import get_redis_password
 from storage.shared.subtensor import get_current_block
 from storage.shared.weights import should_set_weights
@@ -346,10 +346,10 @@ class neuron:
         Starts the subscription handler in a background thread.
         """
         substrate = SubstrateInterface(
-            ss58_format=bt.__ss58_format__,
+            ss58_format=SS58_FORMAT,
             use_remote_preset=True,
             url=self.subtensor.chain_endpoint,
-            type_registry=bt.__type_registry__,
+            type_registry=TYPE_REGISTRY,
         )
         self.subscription_substrate = substrate
 

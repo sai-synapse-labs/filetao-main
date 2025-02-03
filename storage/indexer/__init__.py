@@ -4,7 +4,7 @@ import asyncio
 
 from time import sleep
 from substrateinterface import SubstrateInterface
-
+from bittensor.core.settings import SS58_FORMAT, TYPE_REGISTRY, FINNEY_ENTRYPOINT
 from . import endpoint as endpoint
 from .sqlite import query
 from .redis import (
@@ -27,9 +27,9 @@ def get_substrate():
     global substrate
     if substrate == None:
         substrate = SubstrateInterface(
-            url=bt.__finney_entrypoint__,
-            ss58_format=bt.__ss58_format__,
-            type_registry=bt.__type_registry__
+            url=FINNEY_ENTRYPOINT,
+            ss58_format=SS58_FORMAT,
+            type_registry=TYPE_REGISTRY
         )
     return substrate
 

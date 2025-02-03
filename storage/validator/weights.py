@@ -20,14 +20,14 @@
 
 # Utils for weights setting on chain.
 
+import numpy as np
 import torch
 import bittensor as bt
-
+from bittensor.utils.weight_utils import convert_weights_and_uids_for_emit, process_weights_for_netuid
 from typing import Optional
 from storage import __spec_version__ as spec_version
 from storage.shared.weights import set_weights
 from storage.validator.event import EventSchema
-
 
 def set_weights_for_validator(
     subtensor: "bt.subtensor",
@@ -50,89 +50,50 @@ def set_weights_for_validator(
         subtensor (bt.subtensor): The Bittensor object managing the blockchain connection.
         wallet (bt.wallet): The miner's wallet holding cryptographic information.
         netuid (int): The unique identifier for the chain subnet.
-        uids (torch.Tensor): miners UIDs on the network.
         metagraph (bt.metagraph): Bittensor metagraph.
-        moving_averaged_scores (torch.Tensor): .
+        moving_averaged_scores (torch.Tensor): Moving averaged scores.
         wandb_on (bool, optional): Flag to determine if logging to Weights & Biases is enabled. Defaults to False.
-        tempo (int): Tempo for 'netuid' subnet.
-        wait_for_inclusion (bool, optional): Whether to wait for the extrinsic to enter a block
-        wait_for_finalization (bool, optional): Whether to wait for the extrinsic to be finalized on the chain
+        wait_for_inclusion (bool, optional): Whether to wait for the extrinsic to enter a block.
+        wait_for_finalization (bool, optional): Whether to wait for the extrinsic to be finalized on the chain.
 
     Returns:
-        success (bool):
-            flag is true if extrinsic was finalized or included in the block.
-            If we did not wait for finalization / inclusion, the response is true.
-
-    Raises:
-        Exception: If there's an error while setting weights, the exception is logged for diagnosis.
+        EventSchema: Event schema containing the results of setting weights.
     """
-    # Calculate the average reward for each uid across non-zero values.
-    # Replace any NaN values with 0.
-    nan_idxs = torch.where(torch.isnan(moving_averaged_scores))[0]
-    moving_averaged_scores_no_nan = torch.where(
-        torch.isnan(moving_averaged_scores),
-        torch.zeros_like(moving_averaged_scores),
-        moving_averaged_scores
-    )
-    # Gather negative indices
-    neg_idxs = torch.where(moving_averaged_scores_no_nan < 0)[0]
+    # Replace NaN values in moving_averaged_scores with 0
+    moving_averaged_scores_no_nan = np.nan_to_num(moving_averaged_scores, nan=0.0)
 
-    # Ensure positive
-    minimum = min(moving_averaged_scores_no_nan)
-
-    # Replace nan with min
-    moving_averaged_scores_no_nan[nan_idxs] = minimum.clone()
-
-    # Make all values positive
+    # Ensure all scores are non-negative
+    minimum = np.min(moving_averaged_scores_no_nan)
     if minimum < 0:
         positive_moving_averaged_scores = moving_averaged_scores_no_nan - minimum
     else:
         positive_moving_averaged_scores = moving_averaged_scores_no_nan
-    bt.logging.debug(f"Positive scores", positive_moving_averaged_scores)
 
-    # Push all originally negative indices to zero
-    positive_moving_averaged_scores[neg_idxs] = 0
+    # Set negative scores to zero
+    positive_moving_averaged_scores[positive_moving_averaged_scores < 0] = 0
 
-    # Normalize, ensuring no division by zero or NaNs occur
-    sum_scores = positive_moving_averaged_scores.sum()
-    bt.logging.info(f"Score sum: {sum_scores}")
+    # Normalize scores
+    sum_scores = np.sum(positive_moving_averaged_scores)
     if sum_scores > 0:
-        raw_weights = torch.nn.functional.normalize(positive_moving_averaged_scores, p=1, dim=0)
+        raw_weights = positive_moving_averaged_scores / sum_scores
     else:
-        raw_weights = torch.zeros_like(positive_moving_averaged_scores)
+        raw_weights = np.zeros_like(positive_moving_averaged_scores)
 
-    # Doubly ensure raw_weights does not contain NaNs (this should not happen after normalization, but as an extra precaution)
-    raw_weights = torch.where(
-        torch.isnan(raw_weights),
-        torch.zeros_like(raw_weights),
-        raw_weights,
-    )
-
-    bt.logging.debug("raw_weights", raw_weights)
-    bt.logging.debug("raw_weight_uids", metagraph.uids.to("cpu"))
-
-    # Process the raw weights to final_weights via subtensor limitations.
-    (
-        processed_weight_uids,
-        processed_weights,
-    ) = bt.utils.weight_utils.process_weights_for_netuid(
-        uids=metagraph.uids.to("cpu"),
-        weights=raw_weights.to("cpu"),
+    # Process weights for the specific subnet
+    processed_weight_uids, processed_weights = process_weights_for_netuid(
+        uids=metagraph.uids,
+        weights=raw_weights,
         netuid=netuid,
         subtensor=subtensor,
         metagraph=metagraph,
     )
-    bt.logging.debug("processed_weights", processed_weights)
-    bt.logging.debug("processed_weight_uids", processed_weight_uids)
 
-    # Convert to uint16 weights and uids.
-    uint_uids, uint_weights = bt.utils.weight_utils.convert_weights_and_uids_for_emit(
+    # Convert to uint16 weights and uids
+    uint_uids, uint_weights = convert_weights_and_uids_for_emit(
         uids=processed_weight_uids, weights=processed_weights
     )
-    bt.logging.debug("uint_weights", uint_weights)
-    bt.logging.debug("uint_uids", uint_uids)
 
-    # Set the weights on chain via our subtensor connection.
+    # Set the weights on chain via our subtensor connection
     success, message = set_weights(
         subtensor=subtensor,
         wallet=wallet,
@@ -141,19 +102,14 @@ def set_weights_for_validator(
         weights=uint_weights,
         wandb_on=wandb_on,
         version_key=spec_version,
-        wait_for_finalization=False,
-        wait_for_inclusion=False,
+        wait_for_finalization=wait_for_finalization,
+        wait_for_inclusion=wait_for_inclusion,
     )
 
-    if success is True:
+    if success:
         bt.logging.info("Set weights on chain successfully!")
-        best_idx = torch.argmax(torch.tensor(uint_weights)).item()
-        bt.logging.debug(f"Best index in set weights: {best_idx}")
-
+        best_idx = np.argmax(uint_weights)
         best_uid = uint_uids[best_idx]
-        bt.logging.debug(f"Best UID in set weights: {best_uid}")
-        bt.logging.debug(f"Best weight in set weights: {uint_weights[best_idx]}")
-
         event = EventSchema(
             task_name="SetWeights",
             successful=[],
@@ -168,8 +124,7 @@ def set_weights_for_validator(
             rewards=[],
             set_weights=uint_weights,
         )
-
         return event
-
     else:
-        bt.logging.error(f"Set weights failed {message}.")
+        bt.logging.error(f"Set weights failed: {message}")
+        return None

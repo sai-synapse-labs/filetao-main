@@ -852,7 +852,8 @@ def get_current_epoch(subtensor, netuid: int = 229) -> int:
     Returns:
     int: The current epoch calculated based on the elapsed blocks and the network's tempo.
     """
-    registered_at = 2009702
-    blocks_since_registration = subtensor.get_current_block() - registered_at
-    current_epoch = blocks_since_registration // subtensor.tempo(netuid)
+    # TODO: Actaully figure out the current epoch, and why we need this
+    if subtensor.network is 'local':
+        netuid = 1
+    current_epoch = subtensor.get_current_block() // subtensor.tempo(netuid)
     return current_epoch

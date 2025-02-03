@@ -18,33 +18,22 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import os
-import json
-import base64
-import asyncio
 import argparse
-
-import storage
-from storage.validator.encryption import encrypt_data
-from storage.validator.cid import generate_cid_string
-from storage.shared.ecc import hash_data
-from storage.api.store_api import store
-from storage.shared.utils import get_coldkey_wallets_for_path, get_hash_mapping, save_hash_mapping
+import os
 
 import bittensor
-
-from typing import List
+from bittensor import logging
 from rich.prompt import Prompt
-from storage.validator.utils import get_all_validators
 
+from storage.api.store_api import store
+from storage.shared.utils import save_hash_mapping
 from .default_values import defaults
-
 
 bittensor.trace()
 
 
-# Create a console instance for CLI display.
-console = bittensor.__console__
+# Initialize the Bittensor console
+console = logging.console
 
 
 
@@ -86,7 +75,7 @@ class StoreData:
         wallet = bittensor.wallet(
             name=cli.config.wallet.name, hotkey=cli.config.wallet.hotkey
         )
-        bittensor.logging.debug("wallet:", wallet)
+        console.debug("wallet:", wallet)
 
         # Unlock the wallet
         if cli.config.encrypt:
@@ -95,7 +84,7 @@ class StoreData:
 
         cli.config.filepath = os.path.expanduser(cli.config.filepath)
         if not os.path.exists(cli.config.filepath):
-            bittensor.logging.error(
+            console.error(
                 "File does not exist: {}".format(cli.config.filepath)
             )
             return
@@ -105,16 +94,16 @@ class StoreData:
 
         hash_basepath = os.path.expanduser(cli.config.hash_basepath)
         hash_filepath = os.path.join(hash_basepath, wallet.name + ".json")
-        bittensor.logging.debug("store hashes path:", hash_filepath)
+        console.debug("store hashes path:", hash_filepath)
 
         try:
             sub = bittensor.subtensor(network=cli.config.subtensor.network)
-            bittensor.logging.debug("subtensor:", sub)
+            console.debug("subtensor:", sub)
             await StoreData._run(cli, raw_data, sub, wallet, hash_filepath)
         finally:
             if "sub" in locals():
                 sub.close()
-                bittensor.logging.debug("closing subtensor connection")
+                console.debug("closing subtensor connection")
 
     @staticmethod
     async def _run(cli, raw_data: bytes, subtensor: "bittensor.subtensor", wallet: "bittensor.wallet", hash_filepath: str):
@@ -136,7 +125,7 @@ class StoreData:
                 )
 
             if len(stored_hotkeys) > 0:
-                bittensor.logging.info(
+                console.info(
                     f"Stored data with hotkeys: {stored_hotkeys}."
                 )
                 success = True
@@ -145,11 +134,11 @@ class StoreData:
             # Save hash mapping after successful storage
             filename = os.path.basename(cli.config.filepath)
             save_hash_mapping(hash_filepath, filename=filename, data_hash=data_hash, hotkeys=stored_hotkeys)
-            bittensor.logging.info(
+            console.info(
                 f"Stored {filename} on the Bittensor network with CID {data_hash}"
             )
         else:
-            bittensor.logging.error(f"Failed to store data at {cli.config.filepath}.")
+            console.error(f"Failed to store data at {cli.config.filepath}.")
 
     @staticmethod
     def check_config(config: "bittensor.config"):
@@ -244,4 +233,4 @@ class StoreData:
 
         bittensor.wallet.add_args(store_parser)
         bittensor.subtensor.add_args(store_parser)
-        bittensor.logging.add_args(store_parser)
+        console.add_args(store_parser)

@@ -18,27 +18,20 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import os
-import json
-import torch
-import base64
 import argparse
-
-import storage
-from storage.validator.encryption import decrypt_data_with_private_key
-from storage.api.retrieve_api import retrieve
-from storage.shared.utils import list_all_hashes
+import os
+from typing import List
 
 import bittensor
-
-from typing import List
+from bittensor import logging
 from rich.prompt import Prompt
 
+from storage.api.retrieve_api import retrieve
+from storage.shared.utils import list_all_hashes
 from .default_values import defaults
 
-
-# Create a console instance for CLI display.
-console = bittensor.__console__
+# Initialize the Bittensor console
+console = logging.console
 
 
 
@@ -54,7 +47,7 @@ class RetrieveData:
     The command caters to users who need to access specific data from the network, ensuring a secure and efficient retrieval process.
 
     Optional arguments:
-    - --data_hash (str): The unique hash of the data to be retrieved.
+    - --cid (str): The unique content ID of the data to be retrieved.
     - --hash_basepath (str): The base path where hash files are stored. Defaults to '~/.bittensor/hashes'.
     - --stake_limit (float): The stake limit for excluding validator axons from the query.
     - --storage_basepath (str): The path to store the retrieved data. Defaults to '~/.bittensor/storage'.
@@ -64,7 +57,7 @@ class RetrieveData:
     - Location where the retrieved data is saved (if successful).
 
     Example usage:
-    >>> ftcli retrieve get --data_hash "123abc"
+    >>> ftcli retrieve get --cid "123abc"
 
     Note:
     This command is essential for individuals and applications that require access to specific data from the Bittensor network.
@@ -78,17 +71,19 @@ class RetrieveData:
         wallet = bittensor.wallet(
             name=cli.config.wallet.name, hotkey=cli.config.wallet.hotkey
         )
-        bittensor.logging.debug("wallet:", wallet)
+        bittensor.logging.debug("Wallet initialized: {}".format(wallet))
 
         cli.config.storage_basepath = os.path.expanduser(cli.config.storage_basepath)
 
         if not os.path.exists(cli.config.storage_basepath):
             bittensor.logging.info(
-                "generating filepath: {}".format(cli.config.storage_basepath)
+                "Creating storage basepath: {}".format(cli.config.storage_basepath)
             )
             os.makedirs(cli.config.storage_basepath)
+
         base_outpath = os.path.expanduser(cli.config.storage_basepath)
         outpath = os.path.join(base_outpath, cli.config.cid)
+
         try:
             if (
                 wallet.coldkeypub_file.exists_on_device()
@@ -98,12 +93,12 @@ class RetrieveData:
                     os.path.join(cli.config.hash_basepath, wallet.name) + ".json"
                 )
                 hashes_dict = list_all_hashes(hash_file)
-                bittensor.logging.debug(f"hashes dict: {hashes_dict}")
+                bittensor.logging.debug(f"Hashes dictionary: {hashes_dict}")
                 reverse_hashes_dict = {v: k for k, v in hashes_dict.items() if "hotkeys" not in k}
                 if cli.config.cid in reverse_hashes_dict:
                     filename = reverse_hashes_dict[cli.config.cid]
                     outpath = os.path.join(base_outpath, filename)
-                    bittensor.logging.debug(f"set filename: {filename}")
+                    bittensor.logging.debug(f"Set filename: {filename}")
                     hotkeys = hashes_dict[filename + "_hotkeys"]
                 else:
                     hotkeys = []
@@ -112,27 +107,26 @@ class RetrieveData:
 
         except Exception as e:
             bittensor.logging.warning(
-                "Failed to lookup filename for CID: {} ".format(e),
-                "Reverting to hash value as filename {outpath}",
+                "Failed to lookup filename for CID: {}. Reverting to CID as filename: {}".format(e, outpath)
             )
 
         # TODO: Pull hotkeys from the cache for the given cid.
 
         try:
             sub = bittensor.subtensor(network=cli.config.subtensor.network)
-            bittensor.logging.debug("subtensor:", sub)
+            bittensor.logging.debug("Subtensor initialized: {}".format(sub))
             await RetrieveData._run(cli, sub, outpath, wallet, hotkeys)
         finally:
             if "sub" in locals():
                 sub.close()
-                bittensor.logging.debug("closing subtensor connection")
+                bittensor.logging.debug("Closed subtensor connection")
 
     @staticmethod
     async def _run(cli, sub: "bittensor.subtensor", outpath: str, wallet: "bittensor.wallet", hotkeys: List[str] = None):
         r"""Retrieve data from the Bittensor network for the given data_hash."""
 
         success = False
-        with bittensor.__console__.status(":satellite: Retreiving data..."):
+        with console.status(":satellite: Retrieving data..."):
 
             data = await retrieve(
                 cli.config.cid,
@@ -160,16 +154,17 @@ class RetrieveData:
             network = Prompt.ask(
                 "Enter subtensor network",
                 default=defaults.subtensor.network,
-                choices=["finney", "test"],
+                choices=["finney", "test", "local"],
             )
             config.subtensor.network = str(network)
 
         if not config.is_set("netuid") and not config.no_prompt:
+            # TODO: What defaults?
             netuid = Prompt.ask(
                 "Enter netuid",
                 default=defaults.netuid
-                if config.subtensor.network == "finney"
-                else "22",
+                if config.subtensor.network == "test"
+                else "229",
             )
             config.netuid = str(netuid)
 
@@ -194,7 +189,7 @@ class RetrieveData:
         retrieve_parser.add_argument(
             "--cid",
             type=str,
-            help="Data content id to retrieve from= the Bittensor network.",
+            help="Data content id to retrieve from the Bittensor network.",
         )
         retrieve_parser.add_argument(
             "--hash_basepath",

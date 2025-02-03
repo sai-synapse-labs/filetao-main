@@ -72,7 +72,7 @@ setup(
     include_package_data=True,
     author_email="sai@synapselabsdev.com",
     license="MIT",
-    python_requires=">=3.9,<3.12",
+    python_requires=">=3.9,<3.13",
     entry_points={
         "console_scripts": [
             "filetao=storage.cli.cli:filetao"

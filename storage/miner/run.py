@@ -23,6 +23,9 @@ import bittensor as bt
 from substrateinterface import SubstrateInterface
 from storage.shared.checks import check_registration
 from .utils import update_storage_stats
+from bittensor.core.settings import SS58_FORMAT, TYPE_REGISTRY
+
+
 
 
 def run(self):
@@ -56,10 +59,10 @@ def run(self):
         os.makedirs(data_directory)
 
     block_handler_substrate = SubstrateInterface(
-        ss58_format=bt.__ss58_format__,
+        ss58_format=SS58_FORMAT,
         use_remote_preset=True,
         url=self.subtensor.chain_endpoint,
-        type_registry=bt.__type_registry__,
+        type_registry=TYPE_REGISTRY,
     )
 
     netuid = self.config.netuid

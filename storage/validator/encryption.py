@@ -103,9 +103,14 @@ def encrypt_data_with_wallet(data: bytes, wallet) -> bytes:
     The generated key is used to encrypt the data using the NaCl secret box (XSalsa20-Poly1305).
     The function is intended for encrypting arbitrary data securely using wallet-based keys.
     """
-    # Derive symmetric key from wallet's coldkey
-    password = wallet.coldkey.private_key.hex()
-    password_bytes = bytes(password, "utf-8")
+    # Ensure that wallet.coldkey.private_key is a bytes object
+    private_key = wallet.coldkey.private_key
+    if isinstance(private_key, list):
+        private_key = bytes(private_key)
+    elif not isinstance(private_key, bytes):
+        raise TypeError(f"Expected bytes, got {type(private_key)}")
+
+    password_bytes = private_key
     kdf = pwhash.argon2i.kdf
     key = kdf(
         secret.SecretBox.KEY_SIZE,
@@ -387,41 +392,27 @@ def setup_encryption_wallet(
         bt.wallet: A Bittensor wallet object with coldkey and coldkeypub set.
     """
 
-    # Init wallet
-    w = bt.wallet(wallet_name, wallet_hotkey)
+    # Initialize wallet
+    wallet = bt.wallet(wallet_name, wallet_hotkey)
 
     # Check if wallet exists on device
-    if w.coldkey_file.exists_on_device() or w.coldkeypub_file.exists_on_device():
-        bt.logging.info(f"Wallet {w} already exists on device. Not overwriting wallet.")
-        return w
+    if wallet.coldkey_file.exists_on_device() or wallet.coldkeypub_file.exists_on_device():
+        bt.logging.info(f"Wallet {wallet_name} already exists on device. Not overwriting wallet.")
+        return wallet
 
     # Generate mnemonic and create keypair
     mnemonic = bt.Keypair.generate_mnemonic(n_words)
     keypair = bt.Keypair.create_from_mnemonic(mnemonic)
 
     # Set coldkeypub
-    w._coldkeypub = bt.Keypair(ss58_address=keypair.ss58_address)
-    w.coldkeypub_file.set_keypair(
-        w._coldkeypub, encrypt=use_encryption, overwrite=overwrite, password=password
-    )
+    wallet.set_coldkeypub(keypair, encrypt=use_encryption, overwrite=overwrite)
 
     # Set coldkey
-    w._coldkey = keypair
-    w.coldkey_file.set_keypair(
-        w._coldkey, encrypt=use_encryption, overwrite=overwrite, password=password
-    )
-
-    # Write cold keyfile data to file with specified password
-    keyfile = w.coldkey_file
-    keyfile.make_dirs()
-    keyfile_data = bt.serialized_keypair_to_keyfile_data(keypair)
-    if use_encryption:
-        keyfile_data = bt.encrypt_keyfile_data(keyfile_data, password)
-    keyfile._write_keyfile_data_to_file(keyfile_data, overwrite=True)
+    wallet.set_coldkey(keypair, encrypt=use_encryption, overwrite=overwrite)
 
     # Setup hotkey (dummy, but necessary)
-    mnemonic = bt.Keypair.generate_mnemonic(n_words)
-    keypair = bt.Keypair.create_from_mnemonic(mnemonic)
-    w.set_hotkey(keypair, encrypt=False, overwrite=True)
+    hotkey_mnemonic = bt.Keypair.generate_mnemonic(n_words)
+    hotkey_keypair = bt.Keypair.create_from_mnemonic(hotkey_mnemonic)
+    wallet.set_hotkey(hotkey_keypair, encrypt=False, overwrite=True)
 
-    return w
+    return wallet

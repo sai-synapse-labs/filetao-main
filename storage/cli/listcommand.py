@@ -22,13 +22,14 @@ import os
 import json
 import argparse
 import bittensor
+from bittensor import logging
 from rich.console import Console
 from typing import List
 from rich.table import Table
 from tqdm import tqdm
 
-# Create a console instance for CLI display.
-console = bittensor.__console__
+# Initialize the Bittensor console
+console = logging.console
 
 
 def get_coldkey_wallets_for_path(path: str) -> List["bittensor.wallet"]:
@@ -37,8 +38,7 @@ def get_coldkey_wallets_for_path(path: str) -> List["bittensor.wallet"]:
         return [bittensor.wallet(path=path, name=name) for name in wallet_names]
     except StopIteration:
         # No wallet files found.
-        wallets = []
-    return wallets
+        return []
 
 
 def save_hash_mapping(hash_file, filename, data_hash):
@@ -80,9 +80,8 @@ def display_hashes_in_table(wallet_name, hashes_dict):
     for filename, data_hash in hashes_dict.items():
         table.add_row(filename, data_hash)
 
-    console = Console()
-    console.print(f"Hashes for Wallet: {wallet_name}", style="bold green")
-    console.print(table)
+    console.info(f"Hashes for Wallet: {wallet_name}", style="bold green")
+    console.info(table)
 
 
 def create_unified_table(data):
@@ -95,8 +94,7 @@ def create_unified_table(data):
         for filename, data_hash in hashes.items():
             table.add_row(wallet_name, filename, data_hash)
 
-    console = Console()
-    console.print(table)
+    console.info(table)
 
 
 class ListLocalHashes:
@@ -130,7 +128,7 @@ class ListLocalHashes:
 
     @staticmethod
     def run(cli):
-        r"""Lists hashes available to fetch data from the Bittensor network."""
+        """Lists hashes available to fetch data from the Bittensor network."""
 
         try:
             # TODO: review if this is needed
@@ -140,9 +138,7 @@ class ListLocalHashes:
             wallets = []
 
         if not os.path.exists(os.path.expanduser(cli.config.hash_basepath)):
-            bittensor.logging.warning(
-                "Hashes directory does not exist, creating it now"
-            )
+            console.warning("Hashes directory does not exist, creating it now")
             os.makedirs(os.path.expanduser(cli.config.hash_basepath))
 
         cold_wallets = get_coldkey_wallets_for_path(cli.config.wallet.path)

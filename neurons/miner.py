@@ -195,10 +195,11 @@ class miner:
         )
         bt.logging.info(f"Running miner on uid: {self.my_subnet_uid}")
 
-        # Init wandb.
-        if not self.config.wandb.off:
-            bt.logging.debug("loading wandb")
-            init_wandb(self)
+        # TODO: do we need this?
+        # # Init wandb.
+        # if not self.config.wandb.off:
+        #     bt.logging.debug("loading wandb")
+        #     init_wandb(self)
 
         # The axon handles request processing, allowing validators to send this process requests.
         self.axon = bt.axon(wallet=self.wallet, config=self.config)

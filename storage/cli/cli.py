@@ -33,7 +33,7 @@ from .statscommand import ListMinerStats
 from .neuroncommand import RunMiner, RunValidator, RunApi
 
 # Create a console instance for CLI display.
-console = bittensor.__console__
+console = bittensor.logging.console
 
 
 # TODO: create map of coldkey -> hashes file so we can automatically list
