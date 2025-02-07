@@ -112,3 +112,4 @@ Jinja2~=3.1.5
 termcolor~=2.5.0
 fuzzywuzzy~=0.18.0
 Levenshtein~=0.26.1
+async-substrate-interface>=1.0.0rc12
