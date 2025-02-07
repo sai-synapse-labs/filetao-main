@@ -30,6 +30,8 @@ from Crypto.Random import random
 from itertools import combinations, cycle
 from typing import List, Union
 
+from bittensor import Subtensor
+
 from storage.shared.ecc import hash_data
 from storage.validator.database import hotkey_at_capacity
 
@@ -841,7 +843,7 @@ def get_rebalance_script_path(current_dir: str):
     return script_path
 
 
-def get_current_epoch(subtensor, netuid: int = 229) -> int:
+def get_current_epoch(subtensor: Subtensor, netuid: int = 229) -> int:
     """
     Calculates the current epoch number from genesis of the network.
 
@@ -853,7 +855,7 @@ def get_current_epoch(subtensor, netuid: int = 229) -> int:
     int: The current epoch calculated based on the elapsed blocks and the network's tempo.
     """
     # TODO: Actaully figure out the current epoch, and why we need this
-    if subtensor.network is 'local':
+    if subtensor.network is not 'test':
         netuid = 1
     current_epoch = subtensor.get_current_block() // subtensor.tempo(netuid)
     return current_epoch

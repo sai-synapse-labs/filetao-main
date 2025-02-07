@@ -90,7 +90,7 @@ async def forward(self):
         )
 
     # Purge all challenge data to start fresh and avoid requerying hotkeys with stale challenge data
-    current_epoch = get_current_epoch(self.subtensor)
+    current_epoch = get_current_epoch(subtensor=self.subtensor)
     bt.logging.info(
         f"Current epoch: {current_epoch} | Last purged epoch: {self.last_purged_epoch}"
     )

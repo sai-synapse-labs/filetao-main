@@ -71,7 +71,7 @@ def sudo_set_hyperparameter_values(
 
 
 def add_stake(
-    substrate: "SubstrateInterface", wallet: "Wallet", amount: "Balance"
+    substrate: "SubstrateInterface", wallet: "Wallet", amount: "Balance", netuid: int
 ) -> bool:
     """
     Adds stake to a hotkey using SubtensorModule. Mimics command of adding stake
@@ -79,7 +79,11 @@ def add_stake(
     stake_call = substrate.compose_call(
         call_module="SubtensorModule",
         call_function="add_stake",
-        call_params={"hotkey": wallet.hotkey.ss58_address, "amount_staked": amount.rao},
+        call_params={
+            "hotkey": wallet.hotkey.ss58_address,
+            "amount_staked": amount.rao,
+            "netuid": netuid
+        },
     )
     extrinsic = substrate.create_signed_extrinsic(
         call=stake_call, keypair=wallet.coldkey
@@ -98,7 +102,12 @@ def register_subnet(substrate: "SubstrateInterface", wallet: "Wallet") -> bool:
     register_call = substrate.compose_call(
         call_module="SubtensorModule",
         call_function="register_network",
-        call_params={"immunity_period": 0, "reg_allowed": True},
+        call_params={
+            "immunity_period": 0,
+            "reg_allowed": True,
+            "hotkey": wallet.hotkey.ss58_address,
+            "mechid": 1,
+        },
     )
     extrinsic = substrate.create_signed_extrinsic(
         call=register_call, keypair=wallet.coldkey
@@ -121,14 +130,15 @@ async def wait_epoch(subtensor: "Subtensor", netuid: int = 1):
     Raises:
         Exception: If the tempo cannot be determined from the chain.
     """
-    q_tempo = [
-        v.value
-        for [k, v] in subtensor.query_map_subtensor("Tempo")
-        if k.value == netuid
-    ]
-    if len(q_tempo) == 0:
-        raise Exception("could not determine tempo")
-    tempo = q_tempo[0]
+    # q_tempo = [
+    #     v.value
+    #     for [k, v] in subtensor.query_map_subtensor("Tempo")
+    #     if k.value == netuid
+    # ]
+    # if len(q_tempo) == 0:
+    #     raise Exception("could not determine tempo")
+    # tempo = q_tempo[0]
+    tempo = subtensor.tempo(netuid)
     logging.info(f"tempo = {tempo}")
     await wait_interval(tempo, subtensor, netuid)
 

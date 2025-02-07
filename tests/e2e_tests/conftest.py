@@ -42,9 +42,6 @@ def local_chain(request):
     # Pattern match indicates node is compiled and ready
     pattern = re.compile(r"Imported #1")
 
-    # install neuron templates
-    logging.info("downloading and installing neuron templates from github")
-
     timestamp = int(time.time())
 
     def wait_for_node_start(process, pattern):

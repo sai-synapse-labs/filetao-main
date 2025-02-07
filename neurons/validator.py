@@ -126,7 +126,7 @@ class neuron:
         self.subtensor = (
             bt.MockSubtensor()
             if self.config.neuron.mock_subtensor
-            else bt.subtensor(config=self.config)
+            else bt.subtensor(network=self.config.network, config=self.config)
         )
         bt.logging.debug(str(self.subtensor))
 
@@ -190,7 +190,11 @@ class neuron:
         bt.logging.debug(str(self.dendrite))
 
         # Init the event loop.
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
 
         self.wandb = None
 

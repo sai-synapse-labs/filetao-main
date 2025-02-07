@@ -88,7 +88,7 @@ def decrypt_aes(cipher_text: bytes, key: bytes, nonce: bytes, tag: bytes) -> byt
     return data
 
 
-def encrypt_data_with_wallet(data: bytes, wallet) -> bytes:
+def encrypt_data_with_wallet(data: bytes, wallet: bt.Wallet) -> bytes:
     """
     Encrypts the given data using a symmetric key derived from the wallet's coldkey public key.
 
@@ -195,13 +195,13 @@ def decrypt_data_with_wallet(encrypted_data: bytes, wallet) -> bytes:
 
 
 def encrypt_data_with_aes_and_serialize(
-    data: bytes, wallet: bt.wallet
+    data: bytes, wallet: bt.Wallet
 ) -> typing.Tuple[bytes, bytes]:
     """
     Decrypts the given encrypted data using a symmetric key derived from the wallet's coldkey public key.
 
     Args:
-        encrypted_data (bytes): Data to be decrypted.
+        data (bytes): Data to be decrypted.
         wallet (bt.wallet): Bittensor wallet object containing the coldkey.
 
     Returns:

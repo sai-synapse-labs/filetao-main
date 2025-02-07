@@ -137,13 +137,12 @@ def compute_subsequent_commitment(data, previous_seed, new_seed, verbose=False):
     If verbose is set to True, debug information about the types and contents of the parameters
     will be printed to aid in debugging.
     """
-    if verbose:
-        bt.logging.debug("IN COMPUTE SUBESEQUENT COMMITMENT")
-        bt.logging.debug("type of data     :", type(data))
-        bt.logging.debug("type of prev_seed:", type(previous_seed))
-        bt.logging.debug("type of new_seed :", type(new_seed))
+    bt.logging.debug("IN COMPUTE SUBESEQUENT COMMITMENT")
+    bt.logging.debug("type of data     :", type(data))
+    bt.logging.debug("type of prev_seed:", type(previous_seed))
+    bt.logging.debug("type of new_seed :", type(new_seed))
     proof = hash_data(data + previous_seed)
-    return hash_data(str(proof).encode("utf-8") + new_seed), proof
+    return hash_data(str(proof).encode("utf-8") + new_seed), str(proof)
 
 
 def init_wandb(self, reinit=False):

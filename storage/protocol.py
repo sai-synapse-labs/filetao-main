@@ -16,199 +16,129 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import typing
-import pydantic
+from typing import List, Optional, Union, Dict
+from pydantic import BaseModel, Field
 import bittensor as bt
 
 
-# Basically setup for a given piece of data
 class Store(bt.Synapse):
-    # Data to store
+    """
+    Stores encrypted data along with cryptographic parameters for verification.
+    """
     encrypted_data: str  # base64 encoded string of encrypted data (bytes)
-
-    # Setup parameters
-    curve: str  # e.g. P-256
-    g: str  # base point   (hex string representation)
+    curve: str  # e.g., P-256
+    g: str  # base point (hex string representation)
     h: str  # random point (hex string representation)
+    seed: Union[str, int, bytes]  # Random seed (bytes stored as hex) for commitment
 
-    seed: typing.Union[
-        str, int, bytes
-    ]  # random seed (bytes stored as hex) for the commitment
+    # Optional fields that are computed later
+    randomness: Optional[int] = None
+    commitment: Optional[str] = None
+    signature: Optional[bytes] = None
+    commitment_hash: Optional[str] = None
+    ttl: Optional[int] = None  # Time to live (in seconds)
 
-    # Return signature of received data
-    randomness: typing.Optional[int] = None
-    commitment: typing.Optional[str] = None
-    signature: typing.Optional[bytes] = None
-    commitment_hash: typing.Optional[str] = None  # includes seed
-    ttl: typing.Optional[int] = None  # time to live (in seconds)
-
-    required_hash_fields: typing.List[str] = pydantic.Field(
-        [
-            "curve",
-            "g",
-            "h",
-            "seed",
-            "randomness",
-            "commitment",
-            "signature",
-            "commitment_hash",
+    required_hash_fields: List[str] = Field(
+        default=[
+            "curve", "g", "h", "seed", "randomness", "commitment",
+            "signature", "commitment_hash"
         ],
         title="Required Hash Fields",
         description="A list of required fields for the hash.",
-        allow_mutation=False,
     )
-
-    def __str__(self):
-        return (
-            f"Store(encrypted_data={self.encrypted_data[:12]}, "
-            f"curve={self.curve}, "
-            f"g={self.g}, "
-            f"h={self.h}, "
-            f"seed={str(self.seed)[:12]}, "
-            f"randomness={str(self.randomness)[:12]}, "
-            f"commitment={str(self.commitment)[:12]}, "
-            f"commitment_hash={str(self.commitment_hash)[:12]})"
-            f"axon={self.axon.dict()}, "
-            f"dendrite={self.dendrite.dict()}"
-        )
 
 
 class StoreUser(bt.Synapse):
-    # Data to store
+    """
+    Represents a user storing encrypted data with an encryption payload.
+    """
     encrypted_data: str  # base64 encoded string of encrypted data (bytes)
-    encryption_payload: str  # encrypted json serialized bytestring of encryption params
+    encryption_payload: str  # encrypted JSON serialized bytestring of encryption params
 
-    data_hash: typing.Optional[str] = None  # Miner storage lookup key
-    ttl: typing.Optional[int] = None  # time to live (in seconds)
+    data_hash: Optional[str] = None  # Miner storage lookup key
+    ttl: Optional[int] = None  # Time to live (in seconds)
 
-    required_hash_fields: typing.List[str] = pydantic.Field(
-        ["encrypted_data", "encryption_payload"],
+    required_hash_fields: List[str] = Field(
+        default=["encrypted_data", "encryption_payload"],
         title="Required Hash Fields",
-        description="A list of required fields for the hash.",
-        allow_mutation=False,
+        description="A list of required fields for the hash."
     )
 
 
 class Challenge(bt.Synapse):
-    # Query parameters
-    challenge_hash: str  # hash of the data to challenge
-    challenge_index: int  # block indices to challenge
-    chunk_size: int  # bytes (e.g. 1024) for how big the chunks should be
+    """
+    Represents a challenge used for verification of stored data.
+    """
+    challenge_hash: str  # Hash of the data to challenge
+    challenge_index: int  # Block indices to challenge
+    chunk_size: int  # Bytes (e.g., 1024) for chunk sizes
 
-    # Setup parameters
-    g: str  # base point   (hex string representation)
-    h: str  # random point (hex string representation)
+    g: str  # Base point (hex string representation)
+    h: str  # Random point (hex string representation)
     curve: str
-    seed: typing.Union[str, int]  # random seed for the commitment
+    seed: Union[str, int]  # Random seed for the commitment
 
-    # Returns
-    # - commitment hash (hex string) hash( hash( data + prev_seed ) + seed )
-    # - commitment (point represented as hex string)
-    # - data chunk (base64 encoded string of bytes)
-    # - random value (int)
-    # - merkle proof (List[Dict[<left|right>, hex strings])
-    # - merkle root (hex string)
-    commitment_hash: typing.Optional[str] = None
-    commitment_proof: typing.Optional[str] = None
-    commitment: typing.Optional[str] = None
-    data_chunk: typing.Optional[bytes] = None
-    randomness: typing.Optional[int] = None
-    merkle_proof: typing.Optional[
-        typing.Union[typing.List[typing.Dict[str, str]], str]
-    ] = None
-    merkle_root: typing.Optional[str] = None
+    # Results from challenge verification
+    commitment_hash: Optional[str] = None
+    commitment_proof: Optional[str] = None
+    commitment: Optional[str] = None
+    data_chunk: Optional[bytes] = None
+    randomness: Optional[int] = None
+    merkle_proof: Optional[Union[List[Dict[str, str]], str]] = None
+    merkle_root: Optional[str] = None
 
-    required_hash_fields: typing.List[str] = pydantic.Field(
-        [  # TODO: can this be done? I want to verify that these values haven't changed, but
-            # they are None intially...
-            "commitment_hash",
-            "commitment_proof",
-            "commitment",
-            "data_chunk",
-            "randomness",
-            "merkle_proof",
-            "merkle_root",
+    required_hash_fields: List[str] = Field(
+        default=[
+            "commitment_hash", "commitment_proof", "commitment",
+            "data_chunk", "randomness", "merkle_proof", "merkle_root"
         ],
         title="Required Hash Fields",
-        description="A list of required fields for the hash.",
-        allow_mutation=False,
+        description="A list of required fields for the hash."
     )
-
-    def __str__(self):
-        return (
-            f"Challenge(challenge_hash={str(self.challenge_hash[:12])}, "
-            f"challenge_index={self.challenge_index}, "
-            f"chunk_size={self.chunk_size}, "
-            f"g={self.g}, "
-            f"h={self.h}, "
-            f"curve={self.curve}, "
-            f"seed={str(self.seed[:12])}, "
-            f"commitment_hash={str(self.commitment_hash[:12])}, "
-            f"commitment_proof={str(self.commitment_proof[:12])}, "
-            f"commitment={str(self.commitment[:12])}, "
-            f"data_chunk={str(self.data_chunk[:12])}, "
-            f"randomness={str(self.randomness[:12])}, "
-            f"merkle_proof={str(self.merkle_proof[:12])}, "
-            f"merkle_root={str(self.merkle_root[:12])})"
-            f"axon={self.axon.dict()}, "
-            f"dendrite={self.dendrite.dict()}"
-        )
 
 
 class Retrieve(bt.Synapse):
-    # Where to find the data
+    """
+    Handles retrieving stored data along with cryptographic proofs.
+    """
     data_hash: str  # Miner storage lookup key
     seed: str  # New random seed to hash the data with
 
-    # Fetched data and proof
-    data: typing.Optional[str] = None
-    commitment_hash: typing.Optional[str] = None
-    commitment_proof: typing.Optional[str] = None
+    data: Optional[str] = None  # The retrieved data
+    commitment_hash: Optional[str] = None  # Commitment hash for verification
+    commitment_proof: Optional[str] = None  # Proof of commitment
 
-    required_hash_fields: typing.List[str] = pydantic.Field(
-        ["data", "data_hash", "seed", "commtiment_proof", "commitment_hash"],
+    required_hash_fields: List[str] = Field(
+        default=["data", "data_hash", "seed", "commitment_proof", "commitment_hash"],
         title="Required Hash Fields",
-        description="A list of required fields for the hash.",
-        allow_mutation=False,
+        description="A list of required fields for the hash."
     )
-
-    def __str__(self):
-        return (
-            f"Retrieve(data_hash={str(self.data_hash[:12])}, "
-            f"seed={str(self.seed[:12])}, "
-            f"data={str(self.data[:12])}, "
-            f"commitment_hash={str(self.commitment_hash[:12])}, "
-            f"commitment_proof={str(self.commitment_proof[:12])})"
-            f"axon={self.axon.dict()}, "
-            f"dendrite={self.dendrite.dict()}"
-        )
 
 
 class RetrieveUser(bt.Synapse):
-    # Where to find the data
+    """
+    Represents a user retrieving encrypted data with an encryption payload.
+    """
     data_hash: str  # Miner storage lookup key
+    encrypted_data: Optional[str] = None  # Encrypted retrieved data
+    encryption_payload: Optional[str] = None  # Encryption payload metadata
 
-    # Fetched data to return along with AES payload in base64 encoding
-    encrypted_data: typing.Optional[str] = None
-    encryption_payload: typing.Optional[str] = None
-
-    required_hash_fields: typing.List[str] = pydantic.Field(
-        ["data_hash"],
+    required_hash_fields: List[str] = Field(
+        default=["data_hash"],
         title="Required Hash Fields",
-        description="A list of required fields for the hash.",
-        allow_mutation=False,
+        description="A list of required fields for the hash."
     )
 
 
 class DeleteUser(bt.Synapse):
-    # Where to find the data
+    """
+    Handles deletion requests for stored data.
+    """
     data_hash: str  # Miner storage lookup key
+    deleted: bool = False  # Flag indicating whether deletion was successful
 
-    deleted: bool = False
-
-    required_hash_fields: typing.List[str] = pydantic.Field(
-        ["data_hash"],
+    required_hash_fields: List[str] = Field(
+        default=["data_hash"],
         title="Required Hash Fields",
-        description="A list of required fields for the hash.",
-        allow_mutation=False,
+        description="A list of required fields for the hash."
     )

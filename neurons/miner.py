@@ -128,7 +128,7 @@ class miner:
         self.config = miner.config()
         self.check_config(self.config)
         bt.logging(config=self.config, logging_dir=self.config.miner.full_path)
-        bt.logging.info(f"{self.config}")
+        bt.logging.info(f"miner config: {self.config}")
 
         redis_password = get_redis_password(self.config.database.redis_password)
         if self.config.database.native_environment_check:
@@ -155,7 +155,7 @@ class miner:
 
         # Init subtensor
         bt.logging.debug("loading subtensor")
-        self.subtensor = bt.subtensor(config=self.config)
+        self.subtensor = bt.subtensor(network=self.config.network, config=self.config)
         bt.logging.debug(str(self.subtensor))
         self.current_block = self.subtensor.get_current_block()
 
@@ -233,7 +233,11 @@ class miner:
         self.axon.start()
 
         # Init the event loop.
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
 
         # Instantiate runners
         self.should_exit: bool = False
@@ -789,17 +793,18 @@ class miner:
             synapse.axon.status_message = "Previous seed not found"
             return synapse
 
-        bt.logging.trace("entering comput_subsequent_commitment()...")
+        bt.logging.trace("entering compute_subsequent_commitment()...")
         new_seed = synapse.seed.encode()
+        verbose = self.config.miner.verbose or self.config.miner.debug
         next_commitment, proof = compute_subsequent_commitment(
-            encrypted_data_bytes, prev_seed, new_seed, verbose=self.config.miner.verbose
+            encrypted_data_bytes, prev_seed, new_seed, verbose
         )
         if self.config.miner.verbose:
             bt.logging.debug(f"prev seed : {prev_seed}")
             bt.logging.debug(f"new seed  : {new_seed}")
             bt.logging.debug(f"proof     : {proof}")
             bt.logging.debug(f"commitment: {next_commitment}\n")
-        synapse.commitment_hash = next_commitment
+        synapse.commitment_hash = str(next_commitment)
         synapse.commitment_proof = proof
 
         # update the commitment seed challenge hash in storage
@@ -944,7 +949,7 @@ class miner:
             new_seed=synapse.seed.encode(),
             verbose=self.config.miner.verbose,
         )
-        synapse.commitment_hash = commitment
+        synapse.commitment_hash = str(commitment)
         synapse.commitment_proof = proof
 
         # store new seed

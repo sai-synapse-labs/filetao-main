@@ -1,6 +1,6 @@
 import os
 
-from bittensor_wallet import Keypair
+from bittensor import Wallet, Keypair
 
 import bittensor
 
