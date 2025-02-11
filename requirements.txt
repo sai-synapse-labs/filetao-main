@@ -1,7 +1,7 @@
 torch>=2.5.0
 bcrypt==3.2.0 #to update to 4.0.0 breaking changes
-bittensor==9.0.0rc1
-bittensor-cli==9.0.0rc1
+bittensor==9.0.0rc5
+bittensor-cli==9.0.0rc2
 bittensor-wallet==3.0.2
 redis==5.0.1
 pycryptodome==3.21.0
